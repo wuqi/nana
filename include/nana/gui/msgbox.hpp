@@ -20,6 +20,7 @@ namespace nana
 {
 	//Forward declaration of filebox for msgbox
 	class filebox;
+	class folderbox;
 
 	/// Prefabricated modal dialog box (with text, icon and actions buttons) that informs and instructs the user.
 	class msgbox
@@ -125,6 +126,8 @@ namespace nana
 	/// The input value can be a boolean, string, a number, an option from a dropdown list or a date.
 	class inputbox
 	{
+	public:
+
 		struct abstract_content
 		{
 			virtual ~abstract_content() = default;
@@ -134,7 +137,6 @@ namespace nana
 			virtual unsigned fixed_pixels() const;
 		};
 
-	public:
 
 	    /// Shows a checkbox for boolean input
 		class boolean
@@ -266,6 +268,27 @@ namespace nana
 			std::unique_ptr<implement> impl_;
 		};
 
+		/// Path of a folder.
+		///
+		/// The path requires an object of folderbox. When the user clicks the `Browse` button,
+		/// it invokes the folderbox with proper configurations to query a folder path.
+		class folder
+			: public abstract_content
+		{
+			struct implement;
+		public:
+			folder(::std::string label, const ::nana::folderbox&);
+			~folder();
+
+			::std::string value() const;
+		private:
+			//Implementation of abstract_content
+			const ::std::string& label() const override;
+			window create(window, unsigned label_px) override;
+		private:
+			std::unique_ptr<implement> impl_;
+		};
+
 		inputbox(window owner,     ///< A handle to an owner window (just a parent form or widget works)
 		         ::std::string description,   ///< tells users what the purpose for the input. It can be a formatted-text.
                  ::std::string title = ::std::string()  ///< The title for the inputbox.
@@ -298,6 +321,13 @@ namespace nana
 			return _m_open(contents, false);
 		}
 
+		bool show(std::vector<abstract_content*>& contents)
+		{
+			if (contents.empty())
+				return false;
+
+			return _m_open(contents, true);
+		}
         /// Shows the inputbox and wait for the user input blocking other windows.
         ///
         /// This method blocks the execution and prevents user interaction with other
@@ -314,6 +344,13 @@ namespace nana
 			return _m_open(contents, true);
 		}
 
+		bool show_modal(std::vector<abstract_content*>& contents)
+		{
+			if (contents.empty())
+				return false;
+
+			return _m_open(contents, true);
+		}
 		/// Sets a verifier to verify the user input, taking a handle to the inputbox.
 		void verify(std::function<bool(window)> verifier);
 

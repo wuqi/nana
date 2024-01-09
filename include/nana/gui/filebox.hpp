@@ -105,8 +105,8 @@ namespace nana
 	{
 		struct implement;
 
-		folderbox(const folderbox&) = delete;
-		folderbox& operator=(const folderbox&) = delete;
+		//folderbox(const folderbox&) = delete;
+		//folderbox& operator=(const folderbox&) = delete;
 		folderbox(folderbox&&) = delete;
 		folderbox& operator=(folderbox&&) = delete;
 	public:
@@ -118,9 +118,10 @@ namespace nana
 #ifdef __cpp_char8_t
 		folderbox(window owner, const path_type& init_path, std::u8string_view title);
 #endif
-
+		folderbox(const folderbox&);
 		~folderbox();
 
+		void owner(window handle);
 		/// Enables/disables multi select
 		folderbox& allow_multi_select(bool allow);
 
@@ -130,6 +131,8 @@ namespace nana
 		{
 			return show();
 		}
+
+		const path_type& path() const;
 
 		/// Changes title
 		/**

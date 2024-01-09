@@ -1643,6 +1643,10 @@ namespace nana
 		impl_(new implement{ owner, fs::weakly_canonical(init_path).make_preferred(), title, false})
 	{}
 
+	folderbox::folderbox(const folderbox& other)
+	: impl_(new implement(*other.impl_))
+	{}
+
 #ifdef __cpp_char8_t
 	folderbox::folderbox(window owner, const path_type& init_path, std::u8string_view title):
 		impl_(new implement{ owner, fs::weakly_canonical(init_path).make_preferred(), nana::to_string(title), false})
@@ -1654,12 +1658,21 @@ namespace nana
 	{
 		delete impl_;
 	}
-
+	
+	void folderbox::owner(window wd)
+	{
+		impl_->owner = wd;
+	}
 
 	folderbox& folderbox::title(std::string s)
 	{
 		impl_->title.swap(s);
 		return *this;
+	}
+
+	const folderbox::path_type& folderbox::path() const
+	{
+		return impl_->init_path;
 	}
 
 #ifdef __cpp_char8_t

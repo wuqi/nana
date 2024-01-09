@@ -495,6 +495,8 @@ namespace nana
 
 			description_.create(*this);
 			description_.format(true).caption(description);
+			description_.bgcolor(color_rgb(0xf3f3f3));
+			
 			auto description_size = description_.measure(470);
 
 			btn_ok_.create(*this);
@@ -711,6 +713,7 @@ namespace nana
 		impl->checkbox.create(impl->dock, rectangle{ (std::max)(static_cast<int>(label_px) - 18, 0), 0, value_px, 0 });
 		impl->checkbox.check(impl->value);
 		impl->checkbox.caption(impl->label_text);
+		impl->checkbox.bgcolor(color_rgb(0xf3f3f3));
 
 		impl->dock.events().resized.connect_unignorable([impl, value_px](const ::nana::arg_resized&)
 		{
@@ -782,7 +785,7 @@ namespace nana
 		impl->label.text_align(::nana::align::right, ::nana::align_v::center);
 		impl->label.caption(impl->label_text);
 		impl->label.format(true);
-
+		impl->label.bgcolor(color_rgb(0xf3f3f3));
 		auto const value_px = fixed_pixels();
 
 		impl->spinbox.create(impl->dock, rectangle{ static_cast<int>(label_px + 10), 0, value_px, 0 });
@@ -865,7 +868,7 @@ namespace nana
 		impl->label.text_align(::nana::align::right, ::nana::align_v::center);
 		impl->label.caption(impl->label_text);
 		impl->label.format(true);
-
+		impl->label.bgcolor(color_rgb(0xf3f3f3));
 		auto value_px = fixed_pixels();
 
 		impl->spinbox.create(impl->dock, rectangle{ static_cast<int>(label_px + 10), 0, value_px, 0 });
@@ -974,7 +977,7 @@ namespace nana
 		impl->label.text_align(::nana::align::right, ::nana::align_v::center);
 		impl->label.caption(impl->label_text);
 		impl->label.format(true);
-
+		impl->label.bgcolor(color_rgb(0xf3f3f3));
 		unsigned const value_px = fixed_pixels();
 		if (impl->options.empty())
 		{
@@ -1099,7 +1102,7 @@ namespace nana
 		impl->label.text_align(::nana::align::right, ::nana::align_v::center);
 		impl->label.caption(impl->label_text);
 		impl->label.format(true);
-
+		impl->label.bgcolor(color_rgb(0xf3f3f3));
 		int left = static_cast<int>(label_px + 10);
 		impl->wdg_month.create(impl->dock, rectangle{left, 0, 94, 0});
 
@@ -1229,7 +1232,7 @@ namespace nana
 		impl->label.text_align(::nana::align::right, ::nana::align_v::center);
 		impl->label.caption(impl->label_text);
 		impl->label.format(true);
-
+		impl->label.bgcolor(color_rgb(0xf3f3f3));
 		impl->path_edit.create(impl->dock, rectangle{static_cast<int>(label_px + 10), 0, 0, 0});
 		impl->path_edit.caption(impl->fbox.path().u8string());
 		impl->path_edit.multi_lines(false);
@@ -1242,6 +1245,10 @@ namespace nana
 			auto files = impl->fbox.show();
 			if(!files.empty())
 			{
+#ifdef NANA_WINDOWS
+				impl->value = files.front().string();
+				impl->path_edit.caption(nana::charset(files.front().wstring()).to_bytes(nana::unicode::utf8));
+#else
 				impl->value = files.front().string();
 				impl->path_edit.caption(impl->value);
 			}
@@ -1268,6 +1275,99 @@ namespace nana
 	}
 	//end class path
 
+	//class folder
+	struct inputbox::folder::implement
+	{
+		folderbox fbox;
+
+		::std::string value;
+		::std::string label_text;
+		::nana::panel<false> dock;
+		::nana::label label;
+		::nana::textbox path_edit;
+		::nana::button	browse;
+
+		implement(const folderbox& fb, ::std::string&& labelstr)
+			: fbox(fb), label_text(std::move(labelstr))
+		{
+			throw_not_utf8(label_text);
+		}
+	};
+
+	inputbox::folder::folder(::std::string label, const folderbox& fb)
+		: impl_(new implement(fb, std::move(label)))
+	{
+	}
+
+	//Instance for impl_ because implement is incomplete type at the point of declaration
+	inputbox::folder::~folder(){}
+
+	::std::string inputbox::folder::value() const
+	{
+		if (!impl_->path_edit.empty())
+			return impl_->path_edit.caption();
+
+		return impl_->value;
+	}
+
+	//Implementation of abstract_content
+	const ::std::string& inputbox::folder::label() const
+	{
+		return impl_->label_text;
+	}
+
+	window inputbox::folder::create(window wd, unsigned label_px)
+	{
+		auto impl = impl_.get();
+		impl->dock.create(wd);
+
+		impl->label.create(impl->dock, rectangle{ 0, 0, label_px, 0 });
+		impl->label.text_align(::nana::align::right, ::nana::align_v::center);
+		impl->label.caption(impl->label_text);
+		impl->label.format(true);
+		impl->label.bgcolor(color_rgb(0xf3f3f3));
+		impl->path_edit.create(impl->dock, rectangle{static_cast<int>(label_px + 10), 0, 0, 0});
+		impl->path_edit.caption(impl->fbox.path().u8string());
+		impl->path_edit.multi_lines(false);
+
+		impl->browse.create(impl->dock);
+		impl->browse.i18n(i18n_eval("NANA_BUTTON_BROWSE"));
+		impl->browse.events().click.connect_unignorable([wd, impl](const arg_click&)
+		{
+			impl->fbox.owner(wd);
+			auto files = impl->fbox.show();
+			if(!files.empty())
+			{
+#ifdef NANA_WINDOWS
+				impl->value = files.front().string();
+				impl->path_edit.caption(nana::charset(files.front().wstring()).to_bytes(nana::unicode::utf8));
+#else
+				impl->value = files.front().string();
+				impl->path_edit.caption(impl->value);
+#endif
+			}
+		});
+
+		impl->dock.events().resized.connect_unignorable([impl, label_px](const ::nana::arg_resized& arg)
+		{
+			impl->label.size({ label_px, arg.height });
+
+			rectangle rt{ static_cast<int>(label_px)+10, (static_cast<int>(arg.height) - 25), arg.width - label_px - 75, 24};
+			impl->path_edit.move(rt);
+
+			rt.x = static_cast<int>(arg.width - 60);
+			rt.width = 60;
+			impl->browse.move(rt);
+		});
+
+		impl->path_edit.events().destroy.connect_unignorable([impl](const arg_destroy&)
+		{
+			impl->value = impl->path_edit.caption();
+		});
+
+		return impl->dock;
+	}
+	//end class folder
 
 	inputbox::inputbox(window owner, ::std::string desc, ::std::string title)
 		:	owner_{ owner },
@@ -1332,7 +1432,7 @@ namespace nana
 			fixed_px = min_width_entry_field_pixels_;
 
 		inputbox_window input_wd(owner_, images_, valid_areas_, description_, title_, contents.size(), label_px + 10 + fixed_px, each_pixels);
-
+		input_wd.bgcolor(color_rgb(0xf3f3f3));
 		std::vector<window> inputs;
 		for (auto p : contents)
 			inputs.push_back(p->create(input_wd, label_px));
