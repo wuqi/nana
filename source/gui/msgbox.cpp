@@ -1251,6 +1251,7 @@ namespace nana
 #else
 				impl->value = files.front().string();
 				impl->path_edit.caption(impl->value);
+#endif
 			}
 		});
 
