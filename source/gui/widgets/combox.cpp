@@ -543,7 +543,7 @@ namespace nana
 					estate = element_state::disabled;
 
 				facade<element::button> button;
-				button.draw(*graph_, ::nana::color{ 3, 65, 140 }, colors::white, r, estate);
+				button.draw(*graph_, ::nana::color{ 231, 229, 226 }, colors::black, r, estate);
 
 				facade<element::arrow> arrow;// ("solid_triangle");
 				arrow.direction(::nana::direction::south);
@@ -552,7 +552,7 @@ namespace nana
 				r.y += static_cast<int>(r.height - 16) / 2;
 
 				r.width = r.height = 16;
-				arrow.draw(*graph_, {}, colors::white, r, element_state::normal);
+				arrow.draw(*graph_, {}, colors::slate_grey, r, element_state::normal);
 			}
 
 			void _m_draw_image()

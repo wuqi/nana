@@ -182,7 +182,7 @@ namespace nana
 		{
 			struct implement;
 		public:
-			real(::std::string label, double init_value, double begin, double last, double step);
+			real(::std::string label, double init_value, double begin, double last, double step, int precision = 6);
 			~real();
 
 			double value() const;

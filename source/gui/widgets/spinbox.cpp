@@ -49,8 +49,8 @@ namespace nana
 			: public range_interface
 		{
 		public:
-			range_numeric(T vbegin, T vlast, T step)
-				: begin_{ vbegin }, last_{ vlast }, step_{ step }, value_{ vbegin }
+			range_numeric(T vbegin, T vlast, T step,int precision)
+				: begin_{ vbegin }, last_{ vlast }, step_{ step }, value_{ vbegin }, precision_{precision}
 			{}
 
 			std::pair<T, T> range() const
@@ -61,6 +61,7 @@ namespace nana
 			std::string value() const override
 			{
 				std::stringstream ss;
+				ss.precision(precision_);
 				ss << value_;
 				return ss.str();
 			}
@@ -134,6 +135,7 @@ namespace nana
 			T last_;
 			T step_;
 			T value_;
+			int precision_;
 		};
 
 		class range_text
@@ -274,7 +276,7 @@ namespace nana
 				editor_->textbase().set_event_agent(evt_agent_.get());
 
 				if (!range_)
-					range_.reset(new range_numeric<int>(0, 100, 1));
+					range_.reset(new range_numeric<int>(0, 100, 1, 6));
 
 				reset_text();
 
@@ -481,20 +483,20 @@ namespace nana
 				spin_r1.y += static_cast<int>(spin_r0.height);
 				spin_r1.height = _m_spins_area().height - spin_r0.height;
 
-				::nana::color bgcolor{ 3, 65, 140 };
+				::nana::color bgcolor{ 231, 229, 226 };
 				facade<element::arrow> arrow;
 				facade<element::button> button;
 
 				auto spin_state = (buttons::increase == spins ? estate : element_state::normal);
-				button.draw(*graph_, bgcolor, colors::white, spin_r0, spin_state);
+				button.draw(*graph_, bgcolor, colors::slate_grey, spin_r0, spin_state);
 				spin_r0.x += 5;
-				arrow.draw(*graph_, bgcolor, colors::white, spin_r0, spin_state);
+				arrow.draw(*graph_, bgcolor, colors::slate_grey, spin_r0, spin_state);
 
 				spin_state = (buttons::decrease == spins ? estate : element_state::normal);
-				button.draw(*graph_, bgcolor, colors::white, spin_r1, spin_state);
+				button.draw(*graph_, bgcolor, colors::slate_grey, spin_r1, spin_state);
 				spin_r1.x += 5;
 				arrow.direction(direction::south);
-				arrow.draw(*graph_, bgcolor, colors::white, spin_r1, spin_state);
+				arrow.draw(*graph_, bgcolor, colors::slate_grey, spin_r1, spin_state);
 			}
 		private:
 			::nana::paint::graphics * graph_{nullptr};
@@ -648,14 +650,14 @@ namespace nana
 	void spinbox::range(int begin, int last, int step)
 	{
 		using namespace drawerbase::spinbox;
-		get_drawer_trigger().impl()->set_range(std::unique_ptr<range_interface>(new range_numeric<int>(begin, last, step)));
+		get_drawer_trigger().impl()->set_range(std::unique_ptr<range_interface>(new range_numeric<int>(begin, last, step,6)));
 		api::refresh_window(handle());
 	}
 
-	void spinbox::range(double begin, double last, double step)
+	void spinbox::range(double begin, double last, double step,int precision)
 	{
 		using namespace drawerbase::spinbox;
-		get_drawer_trigger().impl()->set_range(std::unique_ptr<range_interface>(new range_numeric<double>(begin, last, step)));
+		get_drawer_trigger().impl()->set_range(std::unique_ptr<range_interface>(new range_numeric<double>(begin, last, step,precision)));
 		api::refresh_window(handle());
 	}
 

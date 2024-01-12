@@ -94,7 +94,7 @@ namespace nana
 
 		/// Sets the numeric spin values and step.
 		void range(int begin, int last, int step);
-		void range(double begin, double last, double step);
+		void range(double begin, double last, double step,int precision=6);
 
 		/// Sets the string spin values.
 		void range(std::vector<std::string> values_utf8);

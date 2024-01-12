@@ -824,6 +824,7 @@ namespace nana
 		double begin;
 		double last;
 		double step;
+		int precision;
 
 		::std::string label_text;
 		::nana::panel<false> dock;
@@ -831,7 +832,7 @@ namespace nana
 		::nana::spinbox spinbox;
 	};
 
-	inputbox::real::real(::std::string label, double init_value, double begin, double last, double step)
+	inputbox::real::real(::std::string label, double init_value, double begin, double last, double step , int precision)
 		: impl_(new implement)
 	{
 		auto impl = impl_.get();
@@ -839,6 +840,7 @@ namespace nana
 		impl->begin = begin;
 		impl->last = last;
 		impl->step = step;
+		impl->precision = precision;
 		impl->label_text = std::move(label);
 	}
 
@@ -872,7 +874,7 @@ namespace nana
 		auto value_px = fixed_pixels();
 
 		impl->spinbox.create(impl->dock, rectangle{ static_cast<int>(label_px + 10), 0, value_px, 0 });
-		impl->spinbox.range(impl->begin, impl->last, impl->step);
+		impl->spinbox.range(impl->begin, impl->last, impl->step, impl->precision);
 
 		impl->spinbox.value(std::to_string(impl->value));
 
